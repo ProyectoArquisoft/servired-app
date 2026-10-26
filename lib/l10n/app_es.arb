@@ -1,0 +1,25 @@
+{
+  "@@locale": "es",
+  "appTitle": "SERVI·RED",
+  "@appTitle": { "description": "Nombre de la app" },
+
+  "homeGreeting": "¿Qué pasó con tu servicio?",
+  "@homeGreeting": { "description": "Título de la pantalla de inicio" },
+  "homeReportOutage": "Reportar un corte",
+  "@homeReportOutage": { "description": "Botón principal para reportar un corte (RF1)" },
+  "homeReportRestoration": "Ya volvió el servicio",
+  "@homeReportRestoration": { "description": "Botón principal para reportar un restablecimiento (RF2)" },
+  "homeMap": "Mapa",
+  "homeIndicators": "Indicadores",
+  "homeMyReports": "Mis reportes",
+  "homeValidate": "Confirmar servicio cercano",
+  "@homeValidate": { "description": "Acceso a validar restablecimientos cercanos (RF3)" },
+  "homeFraud": "Denunciar conexión fraudulenta",
+  "@homeFraud": { "description": "Acceso a la denuncia anónima (RF4)" },
+  "homeFraudHint": "Es anónimo, no necesitas cuenta",
+
+  "comingSoon": "Muy pronto vas a poder usar esta sección.",
+  "@comingSoon": { "description": "Texto de las pantallas aún no implementadas" },
+  "notFoundTitle": "Página no encontrada",
+  "goHome": "Ir al inicio"
+}
