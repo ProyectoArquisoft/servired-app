@@ -49,6 +49,9 @@ jobs:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
         run: |
+          for v in API_BASE_URL SUPABASE_URL SUPABASE_ANON_KEY; do
+            if [ -z "${!v}" ]; then echo "::error::Falta el secret $v del repositorio"; exit 1; fi
+          done
           jq -n \
             --arg api "$API_BASE_URL" \
             --arg url "$SUPABASE_URL" \
