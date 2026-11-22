@@ -56,3 +56,5 @@ app.*.map.json
 /android/key.properties
 # Localizaciones generadas por `flutter gen-l10n`
 /lib/l10n/app_localizations*.dart
+
+android/build/

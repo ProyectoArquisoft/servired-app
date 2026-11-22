@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import 'package:servired_app/core/router/routes.dart';
 import 'package:servired_app/core/theme/app_theme.dart';
+import 'package:servired_app/features/home/presentation/fraud_history_screen.dart';
 import 'package:servired_app/l10n/app_localizations.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -59,6 +60,16 @@ class HomeScreen extends StatelessWidget {
               label: l10n.homeFraud,
               subtitle: l10n.homeFraudHint,
               onPressed: () => context.push(Routes.fraud),
+            ),
+            _SecondaryAction(
+              icon: Icons.history_outlined,
+              label: 'Historial de denuncias',
+              subtitle: 'Consulta reportes registrados en esta sesión',
+              onPressed: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => const FraudHistoryScreen(),
+                ),
+              ),
             ),
           ],
         ),
