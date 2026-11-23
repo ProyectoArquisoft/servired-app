@@ -155,6 +155,10 @@ class OutageDraftController extends Notifier<OutageDraft> {
           );
       if (!ref.mounted) return;
       state = state.copyWith(submitting: false, result: reporte);
+      // Que "Mis reportes" y los cortes abiertos muestren el reporte nuevo.
+      ref
+        ..invalidate(myReportsProvider)
+        ..invalidate(openReportsProvider);
     } on ApiException catch (e) {
       if (!ref.mounted) return;
       state = state.copyWith(submitting: false, error: e);
