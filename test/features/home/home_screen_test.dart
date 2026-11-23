@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:servired_app/app.dart';
 import 'package:servired_app/core/network/api_client.dart';
@@ -9,6 +10,8 @@ import 'package:servired_app/features/auth/data/auth_repository.dart';
 import '../../helpers/fakes.dart';
 
 void main() {
+  setUp(() => SharedPreferences.setMockInitialValues({}));
+
   Future<void> pumpApp(WidgetTester tester, {bool signedIn = false}) async {
     await tester.pumpWidget(
       ProviderScope(

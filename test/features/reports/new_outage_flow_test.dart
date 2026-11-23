@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:servired_app/app.dart';
 import 'package:servired_app/core/location/location_service.dart';
@@ -35,6 +36,7 @@ void main() {
   }
 
   setUp(() {
+    SharedPreferences.setMockInitialValues({});
     location = FakeLocationService();
     api = FakeAdapter(
       (options) => switch ((options.method, options.path)) {
