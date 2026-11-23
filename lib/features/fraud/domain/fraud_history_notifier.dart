@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class FraudHistoryItem {
   const FraudHistoryItem({
@@ -20,6 +23,29 @@ class FraudHistoryItem {
   final String description;
   final DateTime createdAt;
   final String status;
+
+  factory FraudHistoryItem.fromJson(Map<String, dynamic> json) =>
+      FraudHistoryItem(
+        id: json['id'] as String,
+        reportId: (json['reportId'] as num).toInt(),
+        service: json['service'] as String,
+        latitude: (json['latitude'] as num).toDouble(),
+        longitude: (json['longitude'] as num).toDouble(),
+        description: json['description'] as String,
+        createdAt: DateTime.parse(json['createdAt'] as String),
+        status: json['status'] as String,
+      );
+
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'reportId': reportId,
+    'service': service,
+    'latitude': latitude,
+    'longitude': longitude,
+    'description': description,
+    'createdAt': createdAt.toIso8601String(),
+    'status': status,
+  };
 
   FraudHistoryItem copyWith({
     String? id,
@@ -83,12 +109,51 @@ class FraudHistoryState {
   }
 }
 
+/// Historial de denuncias de este teléfono. Se guarda en el dispositivo
+/// (nunca se envía) para que sobreviva al cierre de la app. Solo contiene lo
+/// que el ciudadano escribió, sin ningún identificador suyo.
 class FraudHistoryNotifier extends Notifier<FraudHistoryState> {
+  static const _storageKey = 'fraud_history_v1';
+
   @override
-  FraudHistoryState build() => const FraudHistoryState();
+  FraudHistoryState build() {
+    _load();
+    return const FraudHistoryState();
+  }
+
+  Future<void> _load() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final raw = prefs.getString(_storageKey);
+      if (raw == null || !ref.mounted) return;
+      final saved = (jsonDecode(raw) as List<dynamic>)
+          .map((e) => FraudHistoryItem.fromJson(e as Map<String, dynamic>))
+          .toList();
+      // Lo que se agregó mientras cargaba va primero y no se duplica.
+      final known = state.items.map((i) => i.id).toSet();
+      state = state.copyWith(
+        items: [...state.items, ...saved.where((i) => !known.contains(i.id))],
+      );
+    } on Exception {
+      // Sin almacenamiento local: el historial queda solo en memoria.
+    }
+  }
+
+  Future<void> _save() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(
+        _storageKey,
+        jsonEncode(state.items.map((i) => i.toJson()).toList()),
+      );
+    } on Exception {
+      // Sin almacenamiento local: el historial queda solo en memoria.
+    }
+  }
 
   void addRecord(FraudHistoryItem item) {
     state = state.copyWith(items: [item, ...state.items]);
+    _save();
   }
 
   void updateStatus(String id, String status) {
@@ -99,6 +164,7 @@ class FraudHistoryNotifier extends Notifier<FraudHistoryState> {
       return item;
     }).toList();
     state = state.copyWith(items: updated);
+    _save();
   }
 
   void setServiceFilter(String service) {
@@ -111,6 +177,7 @@ class FraudHistoryNotifier extends Notifier<FraudHistoryState> {
 
   void clearAll() {
     state = const FraudHistoryState();
+    _save();
   }
 }
 

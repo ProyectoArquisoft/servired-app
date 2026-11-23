@@ -26,7 +26,8 @@ class IndicatorSummary {
     final countsByService = <String, int>{};
 
     for (final item in items) {
-      if (item.status.toLowerCase() == 'enviado') {
+      final status = item.status.toLowerCase();
+      if (status == 'enviado' || status == 'enviada') {
         sent++;
       } else {
         pending++;
