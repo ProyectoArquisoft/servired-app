@@ -319,7 +319,14 @@ class _PhotoCard extends ConsumerWidget {
           .read(photoServiceProvider)
           .pick(fromCamera: fromCamera);
       if (path != null) ref.read(outageDraftProvider.notifier).setPhoto(path);
-    } on PlatformException {
+    } on PlatformException catch (e) {
+      final denied = e.code.contains('denied');
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(denied ? l10n.photoPermission : l10n.photoError),
+        ),
+      );
+    } on Exception {
       messenger.showSnackBar(SnackBar(content: Text(l10n.photoError)));
     }
   }

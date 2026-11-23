@@ -154,5 +154,6 @@
   "validateTooFar": "Estás muy lejos de este corte para confirmarlo (máximo 500 m).",
   "validateConflict": "Ya confirmaste este reporte, o es tuyo, o ya no está pendiente.",
   "myReportsEmpty": "Aún no has reportado cortes.",
-  "myReportsLoadError": "No pudimos cargar tus reportes."
+  "myReportsLoadError": "No pudimos cargar tus reportes.",
+  "photoPermission": "Para usar la foto, da permiso a la cámara o a las fotos en los ajustes del teléfono."
 }

@@ -61,8 +61,13 @@ class FakeLocationService implements LocationService {
 }
 
 class FakePhotoService implements PhotoService {
+  FakePhotoService({this.path});
+
+  /// Ruta que "elige" el ciudadano; `null` simula que canceló.
+  final String? path;
+
   @override
-  Future<String?> pick({required bool fromCamera}) async => null;
+  Future<String?> pick({required bool fromCamera}) async => path;
 }
 
 /// Respuesta simulada del servidor.
