@@ -261,7 +261,7 @@ class _ReportDetailSheet extends ConsumerWidget {
               Text(
                 [
                   municipio,
-                  if (reporte.departamento case final d?) d,
+                  ?reporte.departamento,
                 ].join(', '),
               ),
             Text(l10n.reportValidations(reporte.totalValidaciones)),
