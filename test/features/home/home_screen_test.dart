@@ -63,14 +63,11 @@ void main() {
   });
 
   testWidgets('navega a una sección y vuelve', (tester) async {
-    await pumpApp(tester);
+    await pumpApp(tester, signedIn: true);
 
     await tester.tap(find.text('Mis reportes'));
     await tester.pumpAndSettle();
-    expect(
-      find.text('Buscar por ID, servicio, descripción o estado...'),
-      findsOneWidget,
-    );
+    expect(find.text('Aún no has reportado cortes.'), findsOneWidget);
 
     await tester.binding.handlePopRoute(); // botón "atrás" de Android
     await tester.pumpAndSettle();

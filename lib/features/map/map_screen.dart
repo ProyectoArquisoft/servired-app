@@ -111,15 +111,6 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     }
   }
 
-  void _showDetail(Reporte reporte) {
-    showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      showDragHandle: true,
-      builder: (context) => _ReportDetailSheet(reporte: reporte),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -159,7 +150,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                             width: 48,
                             height: 48,
                             child: GestureDetector(
-                              onTap: () => _showDetail(reporte),
+                              onTap: () => showReportDetail(context, reporte),
                               child: Center(
                                 child: ServiceAvatar(
                                   reporte.tipoServicio,
@@ -217,6 +208,16 @@ class _MapScreenState extends ConsumerState<MapScreen> {
             ),
     );
   }
+}
+
+/// Abre la hoja con el detalle de un reporte (mapa y "Mis reportes").
+void showReportDetail(BuildContext context, Reporte reporte) {
+  showModalBottomSheet<void>(
+    context: context,
+    isScrollControlled: true,
+    showDragHandle: true,
+    builder: (context) => _ReportDetailSheet(reporte: reporte),
+  );
 }
 
 /// Hoja con el resumen del reporte y, al cargar el detalle, su descripción y

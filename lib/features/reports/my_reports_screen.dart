@@ -1,251 +1,125 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 
-import '../fraud/domain/fraud_history_notifier.dart';
+import 'package:servired_app/core/network/api_exception.dart';
+import 'package:servired_app/features/map/map_screen.dart';
+import 'package:servired_app/features/reports/data/reports_repository.dart';
+import 'package:servired_app/features/reports/domain/report_models.dart';
+import 'package:servired_app/l10n/app_localizations.dart';
+import 'package:servired_app/shared/widgets/service_style.dart';
 
-class MyReportsScreen extends ConsumerStatefulWidget {
-  const MyReportsScreen({super.key, this.onRetrySend});
-
-  /// Conecta aquí tu llamada real a la API cuando quieras reenviar un reporte pendiente.
-  /// Debe devolver `true` si el envío fue exitoso o `false` si falló.
-  final Future<bool> Function(FraudHistoryItem item)? onRetrySend;
+/// Reportes de corte creados por el ciudadano (`GET /api/reportes?mios=true`).
+/// El historial de denuncias de fraude vive aparte, en su propia pantalla.
+class MyReportsScreen extends ConsumerWidget {
+  const MyReportsScreen({super.key});
 
   @override
-  ConsumerState<MyReportsScreen> createState() => _MyReportsScreenState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final reports = ref.watch(myReportsProvider);
 
-class _MyReportsScreenState extends ConsumerState<MyReportsScreen> {
-  String _selectedStatus = 'Todos';
-  final Set<String> _retryingIds = {};
-
-  static const _statusFilters = ['Todos', 'Pendiente de envío', 'Enviado'];
-
-  static const _serviceFilters = [
-    'Todos',
-    'Energía',
-    'Agua',
-    'Gas',
-    'Internet',
-  ];
-
-  Future<void> _handleRetry(FraudHistoryItem item) async {
-    if (_retryingIds.contains(item.id)) return;
-
-    setState(() => _retryingIds.add(item.id));
-    final notifier = ref.read(fraudHistoryProvider.notifier);
-
-    try {
-      final sentOk = widget.onRetrySend != null
-          ? await widget.onRetrySend!(item)
-          : false;
-
-      if (!mounted) return;
-
-      if (sentOk) {
-        notifier.updateStatus(item.id, 'Enviado');
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Reporte #${item.reportId} enviado correctamente.'),
-          ),
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'No se pudo enviar el reporte #${item.reportId}. Sigue pendiente.',
+    return Scaffold(
+      appBar: AppBar(title: Text(l10n.homeMyReports)),
+      body: RefreshIndicator(
+        onRefresh: () => ref.refresh(myReportsProvider.future),
+        child: reports.when(
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (error, _) => _Message(
+            icon: Icons.cloud_off,
+            text: error is ApiException
+                ? error.message
+                : l10n.myReportsLoadError,
+            action: FilledButton(
+              onPressed: () => ref.invalidate(myReportsProvider),
+              child: Text(l10n.retry),
             ),
           ),
-        );
-      }
-    } finally {
-      if (mounted) {
-        setState(() => _retryingIds.remove(item.id));
-      }
-    }
+          data: (list) => list.isEmpty
+              ? _Message(icon: Icons.inbox_outlined, text: l10n.myReportsEmpty)
+              : ListView.separated(
+                  padding: const EdgeInsets.all(16),
+                  itemCount: list.length,
+                  separatorBuilder: (_, _) => const SizedBox(height: 8),
+                  itemBuilder: (context, index) => _ReportTile(list[index]),
+                ),
+        ),
+      ),
+    );
   }
+}
 
-  String _formatDate(DateTime date) {
-    final day = date.day.toString().padLeft(2, '0');
-    final month = date.month.toString().padLeft(2, '0');
-    final hour = date.hour.toString().padLeft(2, '0');
-    final minute = date.minute.toString().padLeft(2, '0');
-    return '$day/$month/${date.year} $hour:$minute';
-  }
+class _ReportTile extends StatelessWidget {
+  const _ReportTile(this.reporte);
+
+  final Reporte reporte;
 
   @override
   Widget build(BuildContext context) {
-    final historyState = ref.watch(fraudHistoryProvider);
-    final notifier = ref.read(fraudHistoryProvider.notifier);
+    final l10n = AppLocalizations.of(context);
+    final date = DateFormat(
+      'dd/MM/yyyy HH:mm',
+    ).format(reporte.fechaCreacion.toLocal());
 
-    final services = <String>{
-      ..._serviceFilters,
-      for (final item in historyState.items) item.service,
-    }.toList();
-
-    final visibleItems = historyState.filteredItems.where((item) {
-      if (_selectedStatus == 'Todos') return true;
-      return item.status.toLowerCase() == _selectedStatus.toLowerCase();
-    }).toList();
-
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Mis reportes'),
-        actions: [
-          if (historyState.items.isNotEmpty)
-            IconButton(
-              tooltip: 'Limpiar historial',
-              icon: const Icon(Icons.delete_outline),
-              onPressed: () => notifier.clearAll(),
-            ),
-        ],
-      ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-            child: TextField(
-              onChanged: notifier.setSearchQuery,
-              decoration: InputDecoration(
-                hintText: 'Buscar por ID, servicio, descripción o estado...',
-                prefixIcon: const Icon(Icons.search),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                isDense: true,
-              ),
-            ),
-          ),
-          // Filtro por estado
-          SizedBox(
-            height: 42,
-            child: ListView.separated(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              scrollDirection: Axis.horizontal,
-              itemCount: _statusFilters.length,
-              separatorBuilder: (_, _) => const SizedBox(width: 8),
-              itemBuilder: (context, index) {
-                final status = _statusFilters[index];
-                final selected = _selectedStatus == status;
-                return ChoiceChip(
-                  label: Text(status),
-                  selected: selected,
-                  onSelected: (_) => setState(() => _selectedStatus = status),
-                );
-              },
-            ),
-          ),
-          const SizedBox(height: 6),
-          // Filtro por servicio usando FraudHistoryState.selectedService
-          SizedBox(
-            height: 40,
-            child: ListView.separated(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              scrollDirection: Axis.horizontal,
-              itemCount: services.length,
-              separatorBuilder: (_, _) => const SizedBox(width: 8),
-              itemBuilder: (context, index) {
-                final service = services[index];
-                final selected = historyState.selectedService == service;
-                return FilterChip(
-                  label: Text(service),
-                  selected: selected,
-                  onSelected: (_) => notifier.setServiceFilter(service),
-                );
-              },
-            ),
-          ),
-          const Divider(height: 16),
-          Expanded(
-            child: visibleItems.isEmpty
-                ? const Center(
-                    child: Padding(
-                      padding: EdgeInsets.all(24),
-                      child: Text(
-                        'No hay reportes para mostrar con los filtros actuales.',
-                        textAlign: TextAlign.center,
-                      ),
+    return Card(
+      child: InkWell(
+        borderRadius: BorderRadius.circular(12),
+        onTap: () => showReportDetail(context, reporte),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              ServiceAvatar(reporte.tipoServicio),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      reporte.tipoServicio.label(l10n),
+                      style: Theme.of(context).textTheme.titleMedium,
                     ),
-                  )
-                : ListView.separated(
-                    padding: const EdgeInsets.fromLTRB(16, 4, 16, 20),
-                    itemCount: visibleItems.length,
-                    separatorBuilder: (_, _) => const SizedBox(height: 10),
-                    itemBuilder: (context, index) {
-                      final item = visibleItems[index];
-                      final isPending =
-                          item.status.toLowerCase() == 'pendiente de envío';
-                      final isRetrying = _retryingIds.contains(item.id);
-
-                      return Card(
-                        elevation: 1,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(14),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    'Reporte #${item.reportId} · ${item.service}',
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .titleSmall
-                                        ?.copyWith(fontWeight: FontWeight.bold),
-                                  ),
-                                  Chip(
-                                    label: Text(item.status),
-                                    visualDensity: VisualDensity.compact,
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 6),
-                              Text(item.description),
-                              const SizedBox(height: 8),
-                              Text(
-                                'Fecha: ${_formatDate(item.createdAt)} · '
-                                '(${item.latitude.toStringAsFixed(4)}, '
-                                '${item.longitude.toStringAsFixed(4)})',
-                                style: Theme.of(context).textTheme.bodySmall,
-                              ),
-                              if (isPending) ...[
-                                const SizedBox(height: 10),
-                                Align(
-                                  alignment: Alignment.centerRight,
-                                  child: FilledButton.tonalIcon(
-                                    onPressed: isRetrying
-                                        ? null
-                                        : () => _handleRetry(item),
-                                    icon: isRetrying
-                                        ? const SizedBox(
-                                            width: 16,
-                                            height: 16,
-                                            child: CircularProgressIndicator(
-                                              strokeWidth: 2,
-                                            ),
-                                          )
-                                        : const Icon(Icons.refresh, size: 18),
-                                    label: Text(
-                                      isRetrying
-                                          ? 'Enviando...'
-                                          : 'Reintentar envío',
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ],
-                          ),
-                        ),
-                      );
-                    },
-                  ),
+                    Text(l10n.reportCodeLabel(reporte.codigoTrazabilidad)),
+                    Text(l10n.reportedOn(date)),
+                    const SizedBox(height: 4),
+                    EstadoChip(reporte.estado),
+                  ],
+                ),
+              ),
+              const Icon(Icons.chevron_right),
+            ],
           ),
-        ],
+        ),
       ),
+    );
+  }
+}
+
+class _Message extends StatelessWidget {
+  const _Message({required this.icon, required this.text, this.action});
+
+  final IconData icon;
+  final String text;
+  final Widget? action;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      padding: const EdgeInsets.all(24),
+      children: [
+        const SizedBox(height: 48),
+        Icon(icon, size: 56, color: Theme.of(context).colorScheme.outline),
+        const SizedBox(height: 16),
+        Text(
+          text,
+          textAlign: TextAlign.center,
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
+        if (action != null) ...[
+          const SizedBox(height: 16),
+          Center(child: action),
+        ],
+      ],
     );
   }
 }

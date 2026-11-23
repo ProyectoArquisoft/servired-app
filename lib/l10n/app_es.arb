@@ -152,5 +152,7 @@
   "@validateProgress": { "placeholders": { "hechas": { "type": "int" }, "necesarias": { "type": "int" } } },
   "validateRestored": "¡Gracias! El servicio quedó confirmado como restablecido.",
   "validateTooFar": "Estás muy lejos de este corte para confirmarlo (máximo 500 m).",
-  "validateConflict": "Ya confirmaste este reporte, o es tuyo, o ya no está pendiente."
+  "validateConflict": "Ya confirmaste este reporte, o es tuyo, o ya no está pendiente.",
+  "myReportsEmpty": "Aún no has reportado cortes.",
+  "myReportsLoadError": "No pudimos cargar tus reportes."
 }

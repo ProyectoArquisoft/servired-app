@@ -22,6 +22,12 @@ final openReportsProvider = FutureProvider.autoDispose<List<Reporte>>((
   return mine.where((r) => r.estado.isOpen).toList();
 });
 
+/// Reportes del ciudadano (`mios=true`), el más reciente primero.
+final myReportsProvider = FutureProvider.autoDispose<List<Reporte>>((ref) async {
+  final list = await ref.watch(reportsRepositoryProvider).listMine();
+  return [...list]..sort((a, b) => b.fechaCreacion.compareTo(a.fechaCreacion));
+});
+
 /// Detalle de un reporte (descripción y URL firmada de la evidencia).
 final reportDetailProvider = FutureProvider.autoDispose.family<Reporte, int>(
   (ref, id) => ref.watch(reportsRepositoryProvider).getReport(id),
