@@ -45,10 +45,7 @@ class IndicatorSummary {
 }
 
 class IndicatorsScreen extends ConsumerStatefulWidget {
-  const IndicatorsScreen({
-    super.key,
-    this.onRefreshExternal,
-  });
+  const IndicatorsScreen({super.key, this.onRefreshExternal});
 
   /// Gancho opcional para consultar métricas desde la API cuando el backend esté listo.
   final Future<void> Function()? onRefreshExternal;
@@ -104,10 +101,10 @@ class _IndicatorsScreenState extends ConsumerState<IndicatorsScreen> {
             onPressed: _isRefreshing ? null : _refreshIndicators,
             icon: _isRefreshing
                 ? const SizedBox(
-              width: 18,
-              height: 18,
-              child: CircularProgressIndicator(strokeWidth: 2),
-            )
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
                 : const Icon(Icons.refresh),
           ),
         ],
@@ -159,9 +156,7 @@ class _IndicatorsScreenState extends ConsumerState<IndicatorsScreen> {
                       children: [
                         Text(
                           'Tasa de envío completado',
-                          style: Theme.of(context)
-                              .textTheme
-                              .titleSmall
+                          style: Theme.of(context).textTheme.titleSmall
                               ?.copyWith(fontWeight: FontWeight.bold),
                         ),
                         Text('${(sentRatio * 100).toStringAsFixed(0)}%'),
@@ -181,10 +176,9 @@ class _IndicatorsScreenState extends ConsumerState<IndicatorsScreen> {
             const SizedBox(height: 16),
             Text(
               'Reportes por servicio',
-              style: Theme.of(context)
-                  .textTheme
-                  .titleMedium
-                  ?.copyWith(fontWeight: FontWeight.bold),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             if (sortedServices.isEmpty)
@@ -229,9 +223,7 @@ class _IndicatorsScreenState extends ConsumerState<IndicatorsScreen> {
                           children: [
                             Text(
                               entry.key,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleSmall
+                              style: Theme.of(context).textTheme.titleSmall
                                   ?.copyWith(fontWeight: FontWeight.w600),
                             ),
                             Text('${entry.value}'),
@@ -274,10 +266,9 @@ class _MetricCard extends StatelessWidget {
             const SizedBox(height: 6),
             Text(
               value,
-              style: Theme.of(context)
-                  .textTheme
-                  .headlineSmall
-                  ?.copyWith(fontWeight: FontWeight.bold),
+              style: Theme.of(
+                context,
+              ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 2),
             Text(

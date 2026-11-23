@@ -54,7 +54,7 @@ class FraudHistoryScreen extends ConsumerWidget {
               padding: const EdgeInsets.symmetric(horizontal: 16),
               scrollDirection: Axis.horizontal,
               itemCount: _services.length,
-              separatorBuilder: (_, __) => const SizedBox(width: 8),
+              separatorBuilder: (_, _) => const SizedBox(width: 8),
               itemBuilder: (context, index) {
                 final service = _services[index];
                 final selected = state.selectedService == service;
@@ -70,37 +70,39 @@ class FraudHistoryScreen extends ConsumerWidget {
           Expanded(
             child: items.isEmpty
                 ? const Center(
-              child: Text('No hay denuncias registradas con este filtro.'),
-            )
+                    child: Text(
+                      'No hay denuncias registradas con este filtro.',
+                    ),
+                  )
                 : ListView.separated(
-              padding: const EdgeInsets.all(16),
-              itemCount: items.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 10),
-              itemBuilder: (context, index) {
-                final item = items[index];
-                return Card(
-                  child: ListTile(
-                    title: Text(
-                      'Reporte #${item.reportId} · ${item.service}',
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const SizedBox(height: 4),
-                        Text(item.description),
-                        const SizedBox(height: 4),
-                        Text(
-                          'Coords: ${item.latitude}, ${item.longitude} · ${formatter.format(item.createdAt)}',
-                          style: Theme.of(context).textTheme.bodySmall,
+                    padding: const EdgeInsets.all(16),
+                    itemCount: items.length,
+                    separatorBuilder: (_, _) => const SizedBox(height: 10),
+                    itemBuilder: (context, index) {
+                      final item = items[index];
+                      return Card(
+                        child: ListTile(
+                          title: Text(
+                            'Reporte #${item.reportId} · ${item.service}',
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const SizedBox(height: 4),
+                              Text(item.description),
+                              const SizedBox(height: 4),
+                              Text(
+                                'Coords: ${item.latitude}, ${item.longitude} · ${formatter.format(item.createdAt)}',
+                                style: Theme.of(context).textTheme.bodySmall,
+                              ),
+                            ],
+                          ),
+                          trailing: Chip(label: Text(item.status)),
                         ),
-                      ],
-                    ),
-                    trailing: Chip(label: Text(item.status)),
+                      );
+                    },
                   ),
-                );
-              },
-            ),
           ),
         ],
       ),

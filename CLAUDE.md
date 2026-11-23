@@ -184,3 +184,8 @@ Cada *feature* con `data/` (repositorios, DTOs), `domain/` (modelos) y `presenta
 4. **Mis reportes abiertos:** `GET /api/reportes?mios=true` y filtro de `ACTIVO`/`EN_ATENCION` en el cliente (el parámetro `estado` admite un solo valor).
 5. **Rol `CIUDADANO`:** viaja en `app_metadata.rol`, que el cliente no puede escribir; lo asigna Supabase/infra.
 6. **Localizaciones:** `lib/l10n/app_es.arb` es la plantilla; `app_localizations*.dart` se generan y no se versionan.
+7. **Sesión:** `authRepositoryProvider` envuelve Supabase Auth y se sobrescribe en `main` (y con un *fake* en las pruebas). Las rutas de `Routes.requiresLogin` redirigen a `/ingresar?desde=…`; tras ingresar, el login reemplaza su pantalla por la de `desde`.
+8. **HTTP:** `apiClientProvider` (dio + `AuthInterceptor`) es para las rutas autenticadas. **`/api/fraudes` no debe usarlo** (va sin `Authorization`). Los errores se traducen con `ApiException.fromDio` (mensajes en español y bandera `retryable`).
+9. **Idempotencia sin cola (M2):** cada borrador de reporte genera una `Idempotency-Key` y la reutiliza si el ciudadano pulsa "Reintentar". La cola persistente llega en M3, junto con el caché del catálogo de servicios en sqflite.
+10. **Cámara:** `image_picker` usa el intent del sistema, que no necesita el permiso `CAMERA`. No se declara a propósito: si se declarara, Android exigiría concederlo en tiempo de ejecución antes de abrir la cámara.
+11. **Riverpod sin reintentos automáticos** (`ProviderScope(retry: …)`) para no repetir peticiones a escondidas; el usuario reintenta con un botón.

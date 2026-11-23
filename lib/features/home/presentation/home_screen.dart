@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:servired_app/core/router/routes.dart';
 import 'package:servired_app/core/theme/app_theme.dart';
+import 'package:servired_app/features/auth/data/auth_repository.dart';
 import 'package:servired_app/features/home/presentation/fraud_history_screen.dart';
 import 'package:servired_app/l10n/app_localizations.dart';
 
@@ -15,7 +17,10 @@ class HomeScreen extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.appTitle)),
+      appBar: AppBar(
+        title: Text(l10n.appTitle),
+        actions: const [_AccountButton()],
+      ),
       body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.all(20),
@@ -74,6 +79,44 @@ class HomeScreen extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// "Iniciar sesión" o el menú de la cuenta con "Cerrar sesión".
+class _AccountButton extends ConsumerWidget {
+  const _AccountButton();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final auth = ref.watch(authRepositoryProvider);
+    final signedIn = ref.watch(signedInProvider).value ?? auth.isSignedIn;
+
+    if (!signedIn) {
+      return TextButton.icon(
+        icon: const Icon(Icons.login),
+        label: Text(l10n.login),
+        onPressed: () => context.push(Routes.login),
+      );
+    }
+    return PopupMenuButton<void>(
+      icon: const Icon(Icons.account_circle_outlined),
+      tooltip: l10n.signedInAs(auth.email ?? ''),
+      itemBuilder: (context) => [
+        PopupMenuItem<void>(
+          enabled: false,
+          child: Text(l10n.signedInAs(auth.email ?? '')),
+        ),
+        PopupMenuItem<void>(
+          onTap: auth.signOut,
+          child: ListTile(
+            contentPadding: EdgeInsets.zero,
+            leading: const Icon(Icons.logout),
+            title: Text(l10n.logout),
+          ),
+        ),
+      ],
     );
   }
 }

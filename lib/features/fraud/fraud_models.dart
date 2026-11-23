@@ -23,10 +23,7 @@ class FraudReportRequest {
 }
 
 class FraudReportResponse {
-  const FraudReportResponse({
-    required this.estado,
-    this.motivo,
-  });
+  const FraudReportResponse({required this.estado, this.motivo});
 
   final String estado;
   final String? motivo;

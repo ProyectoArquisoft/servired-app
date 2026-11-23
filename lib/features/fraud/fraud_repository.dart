@@ -27,16 +27,14 @@ class FraudRepository {
   final Dio _dio;
 
   Future<FraudReportResponse> submitAnonymousFraud(
-      FraudReportRequest request,
-      ) async {
+    FraudReportRequest request,
+  ) async {
     try {
       final response = await _dio.post(
         '/api/fraudes',
         data: request.toJson(),
         options: Options(
-          headers: <String, dynamic>{
-            'Idempotency-Key': _generateUuidV4(),
-          },
+          headers: <String, dynamic>{'Idempotency-Key': _generateUuidV4()},
         ),
       );
 
@@ -45,8 +43,8 @@ class FraudRepository {
       return FraudReportResponse.fromJson(data);
     } on DioException catch (e) {
       final responseMap = _asStringKeyMap(e.response?.data);
-      final serverMessage =
-      (responseMap?['detail'] ?? responseMap?['title'])?.toString();
+      final serverMessage = (responseMap?['detail'] ?? responseMap?['title'])
+          ?.toString();
       throw Exception(
         serverMessage ?? 'No se pudo enviar la denuncia anónima.',
       );
@@ -56,7 +54,7 @@ class FraudRepository {
   Map<String, dynamic>? _asStringKeyMap(dynamic value) {
     if (value is Map) {
       return value.map<String, dynamic>(
-            (key, val) => MapEntry(key.toString(), val),
+        (key, val) => MapEntry(key.toString(), val),
       );
     }
     return null;

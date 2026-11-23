@@ -2,6 +2,12 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Usamos tu ubicación para marcar dónde está el corte que reportas.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Puedes tomar una foto del corte como evidencia.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Puedes elegir una foto del corte como evidencia.</string>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>CFBundleDevelopmentRegion</key>

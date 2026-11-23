@@ -45,8 +45,12 @@ class _FraudScreenState extends ConsumerState<FraudScreen> {
     if (!(_formKey.currentState?.validate() ?? false)) return;
 
     final reportId = int.tryParse(_reportIdController.text.trim());
-    final lat = double.tryParse(_latController.text.trim().replaceAll(',', '.'));
-    final lng = double.tryParse(_lngController.text.trim().replaceAll(',', '.'));
+    final lat = double.tryParse(
+      _latController.text.trim().replaceAll(',', '.'),
+    );
+    final lng = double.tryParse(
+      _lngController.text.trim().replaceAll(',', '.'),
+    );
 
     if (reportId == null || lat == null || lng == null) {
       setState(() {
@@ -75,20 +79,21 @@ class _FraudScreenState extends ConsumerState<FraudScreen> {
     });
 
     try {
-      final response =
-      await ref.read(fraudRepositoryProvider).submitAnonymousFraud(
-        FraudReportRequest(
-          idReporte: reportId,
-          idServicio: _selectedServiceId,
-          descripcion: description,
-          lat: lat,
-          lng: lng,
-        ),
-      );
+      final response = await ref
+          .read(fraudRepositoryProvider)
+          .submitAnonymousFraud(
+            FraudReportRequest(
+              idReporte: reportId,
+              idServicio: _selectedServiceId,
+              descripcion: description,
+              lat: lat,
+              lng: lng,
+            ),
+          );
 
-      ref.read(fraudHistoryProvider.notifier).addRecord(
-        baseHistoryItem.copyWith(status: 'Enviada'),
-      );
+      ref
+          .read(fraudHistoryProvider.notifier)
+          .addRecord(baseHistoryItem.copyWith(status: 'Enviada'));
 
       if (!mounted) return;
       setState(() {
@@ -100,7 +105,7 @@ class _FraudScreenState extends ConsumerState<FraudScreen> {
       if (!mounted) return;
       setState(() {
         _errorMessage =
-        '${e.toString().replaceFirst('Exception: ', '')} (Guardada en historial local)';
+            '${e.toString().replaceFirst('Exception: ', '')} (Guardada en historial local)';
       });
     } finally {
       if (mounted) {
@@ -114,9 +119,7 @@ class _FraudScreenState extends ConsumerState<FraudScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Denuncia anónima de fraude'),
-      ),
+      appBar: AppBar(title: const Text('Denuncia anónima de fraude')),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Form(
@@ -152,10 +155,10 @@ class _FraudScreenState extends ConsumerState<FraudScreen> {
                 items: _serviceNames.entries
                     .map(
                       (entry) => DropdownMenuItem<int>(
-                    value: entry.key,
-                    child: Text(entry.value),
-                  ),
-                )
+                        value: entry.key,
+                        child: Text(entry.value),
+                      ),
+                    )
                     .toList(),
                 onChanged: (value) {
                   if (value != null) {
@@ -215,10 +218,10 @@ class _FraudScreenState extends ConsumerState<FraudScreen> {
                 onPressed: _submitting ? null : _submit,
                 child: _submitting
                     ? const SizedBox(
-                  height: 20,
-                  width: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
                     : const Text('Enviar denuncia anónima'),
               ),
               if (_errorMessage != null) ...[

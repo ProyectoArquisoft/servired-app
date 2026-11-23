@@ -27,6 +27,9 @@ flutter pub get
 flutter run --dart-define-from-file=config/dev.json
 ```
 
+En VS Code basta con F5: `.vscode/launch.json` ya pasa ese archivo. Si se ejecuta sin él, la app
+muestra qué valores faltan.
+
 ### URL base según el dispositivo
 
 | Dónde corre la app | `API_BASE_URL` |
@@ -71,11 +74,11 @@ Los textos visibles van en `lib/l10n/app_es.arb`; las clases `AppLocalizations` 
 | Hito | Contenido | Estado |
 |---|---|---|
 | M0 | Proyecto base, lints, tema, router, l10n, CI | ✅ |
-| M1 | Config, cliente HTTP, autenticación | ⏳ |
-| M2 | Reportar corte (3 pasos) | ⏳ |
+| M1 | Config, cliente HTTP, autenticación | ✅ |
+| M2 | Reportar corte (3 pasos) | ✅ (falta caché offline del catálogo → M3) |
 | M3 | Cola offline y sincronización | ⏳ |
 | M4 | Mapa, detalle, mis reportes | ⏳ |
-| M5 | Restablecimiento y validación comunitaria | ⏳ |
+| M5 | Restablecimiento y validación comunitaria | 🟡 restablecimiento listo; falta validación |
 | M6 | Denuncia de fraude anónima | ⏳ |
 | M7 | Indicadores | ⏳ |
 | M8 | Pulido, accesibilidad, APK release | ⏳ |

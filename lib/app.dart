@@ -24,3 +24,33 @@ class ServiRedApp extends ConsumerWidget {
     );
   }
 }
+
+/// Se muestra si la app se ejecutó sin `--dart-define-from-file`.
+class ConfigErrorApp extends StatelessWidget {
+  const ConfigErrorApp({super.key, required this.missing});
+
+  final List<String> missing;
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      theme: AppTheme.light(),
+      locale: ServiRedApp.defaultLocale,
+      supportedLocales: AppLocalizations.supportedLocales,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      home: Builder(
+        builder: (context) {
+          final l10n = AppLocalizations.of(context);
+          return Scaffold(
+            appBar: AppBar(title: Text(l10n.configMissingTitle)),
+            body: Padding(
+              padding: const EdgeInsets.all(24),
+              child: SelectableText(l10n.configMissingBody(missing.join(', '))),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}

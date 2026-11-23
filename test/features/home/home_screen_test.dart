@@ -1,11 +1,37 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:servired_app/app.dart';
+import 'package:servired_app/core/network/api_client.dart';
+import 'package:servired_app/features/auth/data/auth_repository.dart';
+
+import '../../helpers/fakes.dart';
 
 void main() {
-  Future<void> pumpApp(WidgetTester tester) async {
-    await tester.pumpWidget(const ProviderScope(child: ServiRedApp()));
+  Future<void> pumpApp(WidgetTester tester, {bool signedIn = false}) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          authRepositoryProvider.overrideWithValue(
+            FakeAuthRepository(signedIn: signedIn),
+          ),
+          apiClientProvider.overrideWithValue(
+            fakeDio(
+              FakeAdapter(
+                (_) => const FakeResponse(200, {
+                  'items': <Object>[],
+                  'page': 0,
+                  'size': 50,
+                  'total': 0,
+                }),
+              ),
+            ),
+          ),
+        ],
+        child: const ServiRedApp(),
+      ),
+    );
     await tester.pumpAndSettle();
   }
 
@@ -39,7 +65,7 @@ void main() {
   testWidgets('navega a una sección y vuelve', (tester) async {
     await pumpApp(tester);
 
-    await tester.tap(find.text('Reportar un corte'));
+    await tester.tap(find.text('Mapa'));
     await tester.pumpAndSettle();
     expect(
       find.text('Muy pronto vas a poder usar esta sección.'),
@@ -49,5 +75,30 @@ void main() {
     await tester.binding.handlePopRoute(); // botón "atrás" de Android
     await tester.pumpAndSettle();
     expect(find.text('¿Qué pasó con tu servicio?'), findsOneWidget);
+  });
+
+  testWidgets('sin sesión, reportar pide ingresar y luego continúa', (
+    tester,
+  ) async {
+    await pumpApp(tester);
+
+    await tester.tap(find.text('Ya volvió el servicio'));
+    await tester.pumpAndSettle();
+    expect(find.text('Ingresa a tu cuenta'), findsOneWidget);
+
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'Correo electrónico'),
+      'ciudadano@ejemplo.com',
+    );
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'Contraseña'),
+      'secreta123',
+    );
+    await tester.tap(find.text('Ingresar'));
+    await tester.pumpAndSettle();
+
+    // Vuelve a la sección que el ciudadano quería abrir.
+    expect(find.text('Ingresa a tu cuenta'), findsNothing);
+    expect(find.text('No tienes cortes abiertos.'), findsOneWidget);
   });
 }

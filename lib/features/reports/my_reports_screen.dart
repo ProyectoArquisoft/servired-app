@@ -4,10 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../fraud/domain/fraud_history_notifier.dart';
 
 class MyReportsScreen extends ConsumerStatefulWidget {
-  const MyReportsScreen({
-    super.key,
-    this.onRetrySend,
-  });
+  const MyReportsScreen({super.key, this.onRetrySend});
 
   /// Conecta aquí tu llamada real a la API cuando quieras reenviar un reporte pendiente.
   /// Debe devolver `true` si el envío fue exitoso o `false` si falló.
@@ -21,11 +18,7 @@ class _MyReportsScreenState extends ConsumerState<MyReportsScreen> {
   String _selectedStatus = 'Todos';
   final Set<String> _retryingIds = {};
 
-  static const _statusFilters = [
-    'Todos',
-    'Pendiente de envío',
-    'Enviado',
-  ];
+  static const _statusFilters = ['Todos', 'Pendiente de envío', 'Enviado'];
 
   static const _serviceFilters = [
     'Todos',
@@ -129,7 +122,7 @@ class _MyReportsScreenState extends ConsumerState<MyReportsScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 16),
               scrollDirection: Axis.horizontal,
               itemCount: _statusFilters.length,
-              separatorBuilder: (_, __) => const SizedBox(width: 8),
+              separatorBuilder: (_, _) => const SizedBox(width: 8),
               itemBuilder: (context, index) {
                 final status = _statusFilters[index];
                 final selected = _selectedStatus == status;
@@ -149,7 +142,7 @@ class _MyReportsScreenState extends ConsumerState<MyReportsScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 16),
               scrollDirection: Axis.horizontal,
               itemCount: services.length,
-              separatorBuilder: (_, __) => const SizedBox(width: 8),
+              separatorBuilder: (_, _) => const SizedBox(width: 8),
               itemBuilder: (context, index) {
                 final service = services[index];
                 final selected = historyState.selectedService == service;
@@ -165,91 +158,91 @@ class _MyReportsScreenState extends ConsumerState<MyReportsScreen> {
           Expanded(
             child: visibleItems.isEmpty
                 ? const Center(
-              child: Padding(
-                padding: EdgeInsets.all(24),
-                child: Text(
-                  'No hay reportes para mostrar con los filtros actuales.',
-                  textAlign: TextAlign.center,
-                ),
-              ),
-            )
-                : ListView.separated(
-              padding: const EdgeInsets.fromLTRB(16, 4, 16, 20),
-              itemCount: visibleItems.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 10),
-              itemBuilder: (context, index) {
-                final item = visibleItems[index];
-                final isPending =
-                    item.status.toLowerCase() == 'pendiente de envío';
-                final isRetrying = _retryingIds.contains(item.id);
-
-                return Card(
-                  elevation: 1,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(14),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment:
-                          MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              'Reporte #${item.reportId} · ${item.service}',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleSmall
-                                  ?.copyWith(fontWeight: FontWeight.bold),
-                            ),
-                            Chip(
-                              label: Text(item.status),
-                              visualDensity: VisualDensity.compact,
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 6),
-                        Text(item.description),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Fecha: ${_formatDate(item.createdAt)} · '
-                              '(${item.latitude.toStringAsFixed(4)}, '
-                              '${item.longitude.toStringAsFixed(4)})',
-                          style: Theme.of(context).textTheme.bodySmall,
-                        ),
-                        if (isPending) ...[
-                          const SizedBox(height: 10),
-                          Align(
-                            alignment: Alignment.centerRight,
-                            child: FilledButton.tonalIcon(
-                              onPressed: isRetrying
-                                  ? null
-                                  : () => _handleRetry(item),
-                              icon: isRetrying
-                                  ? const SizedBox(
-                                width: 16,
-                                height: 16,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                ),
-                              )
-                                  : const Icon(Icons.refresh, size: 18),
-                              label: Text(
-                                isRetrying
-                                    ? 'Enviando...'
-                                    : 'Reintentar envío',
-                              ),
-                            ),
-                          ),
-                        ],
-                      ],
+                    child: Padding(
+                      padding: EdgeInsets.all(24),
+                      child: Text(
+                        'No hay reportes para mostrar con los filtros actuales.',
+                        textAlign: TextAlign.center,
+                      ),
                     ),
+                  )
+                : ListView.separated(
+                    padding: const EdgeInsets.fromLTRB(16, 4, 16, 20),
+                    itemCount: visibleItems.length,
+                    separatorBuilder: (_, _) => const SizedBox(height: 10),
+                    itemBuilder: (context, index) {
+                      final item = visibleItems[index];
+                      final isPending =
+                          item.status.toLowerCase() == 'pendiente de envío';
+                      final isRetrying = _retryingIds.contains(item.id);
+
+                      return Card(
+                        elevation: 1,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(14),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    'Reporte #${item.reportId} · ${item.service}',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleSmall
+                                        ?.copyWith(fontWeight: FontWeight.bold),
+                                  ),
+                                  Chip(
+                                    label: Text(item.status),
+                                    visualDensity: VisualDensity.compact,
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 6),
+                              Text(item.description),
+                              const SizedBox(height: 8),
+                              Text(
+                                'Fecha: ${_formatDate(item.createdAt)} · '
+                                '(${item.latitude.toStringAsFixed(4)}, '
+                                '${item.longitude.toStringAsFixed(4)})',
+                                style: Theme.of(context).textTheme.bodySmall,
+                              ),
+                              if (isPending) ...[
+                                const SizedBox(height: 10),
+                                Align(
+                                  alignment: Alignment.centerRight,
+                                  child: FilledButton.tonalIcon(
+                                    onPressed: isRetrying
+                                        ? null
+                                        : () => _handleRetry(item),
+                                    icon: isRetrying
+                                        ? const SizedBox(
+                                            width: 16,
+                                            height: 16,
+                                            child: CircularProgressIndicator(
+                                              strokeWidth: 2,
+                                            ),
+                                          )
+                                        : const Icon(Icons.refresh, size: 18),
+                                    label: Text(
+                                      isRetrying
+                                          ? 'Enviando...'
+                                          : 'Reintentar envío',
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
+                        ),
+                      );
+                    },
                   ),
-                );
-              },
-            ),
           ),
         ],
       ),

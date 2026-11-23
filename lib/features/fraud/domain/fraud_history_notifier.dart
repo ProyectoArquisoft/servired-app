@@ -60,7 +60,8 @@ class FraudHistoryState {
       final matchesService =
           selectedService == 'Todos' || item.service == selectedService;
       final q = searchQuery.trim().toLowerCase();
-      final matchesQuery = q.isEmpty ||
+      final matchesQuery =
+          q.isEmpty ||
           item.description.toLowerCase().contains(q) ||
           item.reportId.toString().contains(q) ||
           item.service.toLowerCase().contains(q) ||
@@ -114,6 +115,6 @@ class FraudHistoryNotifier extends Notifier<FraudHistoryState> {
 }
 
 final fraudHistoryProvider =
-NotifierProvider<FraudHistoryNotifier, FraudHistoryState>(
-  FraudHistoryNotifier.new,
-);
+    NotifierProvider<FraudHistoryNotifier, FraudHistoryState>(
+      FraudHistoryNotifier.new,
+    );
