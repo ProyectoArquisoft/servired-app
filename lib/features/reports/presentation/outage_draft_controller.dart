@@ -153,6 +153,28 @@ class OutageDraftController extends Notifier<OutageDraft> {
             ),
             idempotencyKey: state.idempotencyKey,
           );
+      // Respaldo local: "Mis reportes" lo muestra aunque el backend tarde.
+      await ref
+          .read(localReportsStoreProvider)
+          .add(
+            Reporte(
+              idReporte: -DateTime.now().millisecondsSinceEpoch,
+              codigoTrazabilidad: reporte.codigoTrazabilidad,
+              idServicio: servicio.idServicio,
+              tipoServicio: servicio.tipo,
+              estado: EstadoReporte.activo,
+              lat: point.latitude,
+              lng: point.longitude,
+              fechaCreacion: DateTime.now().toUtc(),
+              totalValidaciones: 0,
+              severidad: state.severidad,
+              descripcion: state.descripcion.trim().isEmpty
+                  ? null
+                  : state.descripcion.trim(),
+              evidenciaUrl: state.photoPath,
+              esMio: true,
+            ),
+          );
       if (!ref.mounted) return;
       state = state.copyWith(submitting: false, result: reporte);
       // Que "Mis reportes" y los cortes abiertos muestren el reporte nuevo.

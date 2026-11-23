@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:servired_app/core/network/api_client.dart';
 import 'package:servired_app/core/network/api_exception.dart';
+import 'package:servired_app/features/auth/data/auth_repository.dart';
+import 'package:servired_app/features/reports/data/local_reports_store.dart';
 import 'package:servired_app/features/reports/domain/report_models.dart';
 
 final reportsRepositoryProvider = Provider<ReportsRepository>(
@@ -22,16 +24,40 @@ final openReportsProvider = FutureProvider.autoDispose<List<Reporte>>((
   return mine.where((r) => r.estado.isOpen).toList();
 });
 
-/// Reportes del ciudadano (`mios=true`), el más reciente primero.
+/// Copia local de los reportes creados en este dispositivo (por usuario).
+final localReportsStoreProvider = Provider<LocalReportsStore>(
+  (ref) => LocalReportsStore(ref.watch(authRepositoryProvider).email),
+);
+
+/// Reportes del ciudadano (`mios=true`) más los enviados desde este
+/// dispositivo que el backend aún no devuelve; el más reciente primero.
 final myReportsProvider = FutureProvider.autoDispose<List<Reporte>>((ref) async {
-  final list = await ref.watch(reportsRepositoryProvider).listMine();
-  return [...list]..sort((a, b) => b.fechaCreacion.compareTo(a.fechaCreacion));
+  final local = await ref.watch(localReportsStoreProvider).load();
+  List<Reporte> server;
+  try {
+    server = await ref.watch(reportsRepositoryProvider).listMine();
+  } on ApiException {
+    if (local.isEmpty) rethrow;
+    server = const [];
+  }
+  final merged = [
+    ...server,
+    ...local.where((l) => !server.any(l.sameAs)),
+  ];
+  return merged..sort((a, b) => b.fechaCreacion.compareTo(a.fechaCreacion));
 });
 
 /// Detalle de un reporte (descripción y URL firmada de la evidencia).
-final reportDetailProvider = FutureProvider.autoDispose.family<Reporte, int>(
-  (ref, id) => ref.watch(reportsRepositoryProvider).getReport(id),
-);
+final reportDetailProvider = FutureProvider.autoDispose.family<Reporte, int>((
+  ref,
+  id,
+) async {
+  if (id < 0) {
+    final local = await ref.watch(localReportsStoreProvider).find(id);
+    if (local != null) return local;
+  }
+  return ref.watch(reportsRepositoryProvider).getReport(id);
+});
 
 class ReportsRepository {
   ReportsRepository(this._dio);

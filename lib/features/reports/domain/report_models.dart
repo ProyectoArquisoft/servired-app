@@ -139,6 +139,44 @@ class Reporte {
   final String? descripcion;
   final String? evidenciaUrl;
   final bool? esMio;
+
+  /// Reporte guardado solo en el dispositivo (id negativo).
+  bool get isLocal => idReporte < 0;
+
+  /// ¿Es el mismo reporte que [other]? Se usa para descartar la copia local
+  /// cuando el backend ya lo devuelve (mismo servicio, lugar y momento).
+  bool sameAs(Reporte other) =>
+      idServicio == other.idServicio &&
+      (lat - other.lat).abs() < 1e-4 &&
+      (lng - other.lng).abs() < 1e-4 &&
+      fechaCreacion.difference(other.fechaCreacion).abs() <
+          const Duration(minutes: 10);
+
+  Map<String, dynamic> toJson() => {
+    'idReporte': idReporte,
+    'codigoTrazabilidad': codigoTrazabilidad,
+    'idServicio': idServicio,
+    'tipoServicio': switch (tipoServicio) {
+      TipoServicio.energia => 'ENERGIA',
+      TipoServicio.gas => 'GAS',
+      TipoServicio.acueducto => 'ACUEDUCTO',
+      TipoServicio.alcantarillado => 'ALCANTARILLADO',
+      TipoServicio.aseo => 'ASEO',
+      TipoServicio.desconocido => 'DESCONOCIDO',
+    },
+    'estado': estado.api,
+    'lat': lat,
+    'lng': lng,
+    'fechaCreacion': fechaCreacion.toUtc().toIso8601String(),
+    'totalValidaciones': totalValidaciones,
+    'severidad': severidad?.api,
+    'departamento': departamento,
+    'municipio': municipio,
+    'fechaResolucion': fechaResolucion?.toUtc().toIso8601String(),
+    'descripcion': descripcion,
+    'evidenciaUrl': evidenciaUrl,
+    'esMio': esMio,
+  };
 }
 
 /// Respuesta de `POST /api/reportes/{id}/validaciones`.
