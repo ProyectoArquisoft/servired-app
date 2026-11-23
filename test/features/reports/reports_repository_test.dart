@@ -159,6 +159,58 @@ void main() {
     });
   });
 
+  test('listByBbox envía el rectángulo con 6 decimales y el estado', () async {
+    final adapter = FakeAdapter(
+      (_) => FakeResponse(200, {
+        'items': [reporteJson()],
+        'page': 0,
+        'size': 100,
+        'total': 1,
+      }),
+    );
+    final list = await ReportsRepository(fakeDio(adapter)).listByBbox(
+      minLng: -74.1,
+      minLat: 4.5,
+      maxLng: -74.0,
+      maxLat: 4.7,
+      estado: EstadoReporte.restablecimientoReportado,
+    );
+
+    final query = adapter.requests.single.queryParameters;
+    expect(query['bbox'], '-74.100000,4.500000,-74.000000,4.700000');
+    expect(query['estado'], 'RESTABLECIMIENTO_REPORTADO');
+    expect(query['size'], 100);
+    expect(list.single.idReporte, 1024);
+  });
+
+  test('validate envía la ubicación con Idempotency-Key', () async {
+    final adapter = FakeAdapter(
+      (_) => const FakeResponse(201, {
+        'idValidacion': 77,
+        'idReporte': 1024,
+        'fecha': '2026-10-26T16:40:00Z',
+        'totalValidaciones': 1,
+        'validacionesRequeridas': 3,
+        'estadoReporte': 'RESTABLECIMIENTO_REPORTADO',
+      }),
+    );
+    final result = await ReportsRepository(fakeDio(adapter)).validate(
+      1024,
+      lat: 4.61,
+      lng: -74.08,
+      idempotencyKey: 'llave-v',
+    );
+
+    final request = adapter.requests.single;
+    expect(request.method, 'POST');
+    expect(request.path, '/api/reportes/1024/validaciones');
+    expect(request.headers['Idempotency-Key'], 'llave-v');
+    expect(request.data, {'lat': 4.61, 'lng': -74.08});
+    expect(result.totalValidaciones, 1);
+    expect(result.validacionesRequeridas, 3);
+    expect(result.estadoReporte, EstadoReporte.restablecimientoReportado);
+  });
+
   test('newIdempotencyKey genera UUID v4 distintos', () {
     final a = newIdempotencyKey();
     final b = newIdempotencyKey();

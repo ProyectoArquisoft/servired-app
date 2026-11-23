@@ -8,11 +8,12 @@ import 'package:servired_app/features/auth/presentation/login_screen.dart';
 import 'package:servired_app/features/fraud/fraud_screen.dart';
 import 'package:servired_app/features/home/presentation/home_screen.dart';
 import 'package:servired_app/features/indicators/indicators_screen.dart';
+import 'package:servired_app/features/map/map_screen.dart';
 import 'package:servired_app/features/reports/my_reports_screen.dart';
 import 'package:servired_app/features/reports/presentation/new_outage_screen.dart';
 import 'package:servired_app/features/reports/presentation/restoration_screen.dart';
+import 'package:servired_app/features/reports/presentation/validation_screen.dart';
 import 'package:servired_app/l10n/app_localizations.dart';
-import 'package:servired_app/shared/widgets/placeholder_screen.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   final auth = ref.watch(authRepositoryProvider);
@@ -65,9 +66,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: Routes.indicators,
         builder: (context, state) => const IndicatorsScreen(),
       ),
-      // Secciones que se implementan en M4–M5.
-      _placeholder(Routes.validate, (l10n) => l10n.homeValidate),
-      _placeholder(Routes.map, (l10n) => l10n.homeMap),
+      GoRoute(
+        path: Routes.validate,
+        builder: (context, state) => const ValidationScreen(),
+      ),
+      GoRoute(
+        path: Routes.map,
+        builder: (context, state) => const MapScreen(),
+      ),
     ],
     errorBuilder: (context, state) => const _NotFoundScreen(),
   );
@@ -77,14 +83,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
   });
   return router;
 });
-
-GoRoute _placeholder(String path, String Function(AppLocalizations) title) {
-  return GoRoute(
-    path: path,
-    builder: (context, state) =>
-        PlaceholderScreen(title: title(AppLocalizations.of(context))),
-  );
-}
 
 class _NotFoundScreen extends StatelessWidget {
   const _NotFoundScreen();

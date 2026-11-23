@@ -140,3 +140,25 @@ class Reporte {
   final String? evidenciaUrl;
   final bool? esMio;
 }
+
+/// Respuesta de `POST /api/reportes/{id}/validaciones`.
+class Validacion {
+  const Validacion({
+    required this.idReporte,
+    required this.totalValidaciones,
+    required this.validacionesRequeridas,
+    required this.estadoReporte,
+  });
+
+  factory Validacion.fromJson(Map<String, dynamic> json) => Validacion(
+    idReporte: (json['idReporte'] as num).toInt(),
+    totalValidaciones: (json['totalValidaciones'] as num).toInt(),
+    validacionesRequeridas: (json['validacionesRequeridas'] as num).toInt(),
+    estadoReporte: EstadoReporte.fromApi(json['estadoReporte']),
+  );
+
+  final int idReporte;
+  final int totalValidaciones;
+  final int validacionesRequeridas;
+  final EstadoReporte estadoReporte;
+}

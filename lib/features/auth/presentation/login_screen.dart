@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show debugPrint, kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -61,12 +62,24 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       }
     } on AuthException catch (e) {
       final code = e.code ?? '';
+      // Útil al depurar: el mensaje real de Supabase no se muestra al usuario.
+      debugPrint('Auth error: code=$code status=${e.statusCode} ${e.message}');
+      final message = switch (code) {
+        'email_not_confirmed' => l10n.emailNotConfirmed,
+        'user_already_exists' || 'email_exists' => l10n.registerEmailTaken,
+        'weak_password' => l10n.registerWeakPassword,
+        'over_email_send_rate_limit' ||
+        'over_request_rate_limit' => l10n.registerRateLimited,
+        'signup_disabled' || 'email_provider_disabled' => l10n.registerDisabled,
+        'email_address_invalid' || 'validation_failed' =>
+          l10n.registerEmailInvalid,
+        _ when _registering => l10n.registerFailed,
+        _ => l10n.loginFailed,
+      };
       setState(
-        () => _error = switch (code) {
-          'email_not_confirmed' => l10n.emailNotConfirmed,
-          _ when _registering => l10n.registerFailed,
-          _ => l10n.loginFailed,
-        },
+        () => _error = kDebugMode && code.isNotEmpty
+            ? '$message [$code]'
+            : message,
       );
     } on Exception {
       setState(() => _error = l10n.authNetworkError);

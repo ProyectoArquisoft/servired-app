@@ -12,5 +12,5 @@ abstract final class Routes {
 
   /// Rutas que exigen sesión (el contrato pide rol CIUDADANO). La denuncia de
   /// fraude y los indicadores son públicos.
-  static const requiresLogin = {newOutage, restoration};
+  static const requiresLogin = {newOutage, restoration, validate, map};
 }

@@ -22,6 +22,11 @@ final openReportsProvider = FutureProvider.autoDispose<List<Reporte>>((
   return mine.where((r) => r.estado.isOpen).toList();
 });
 
+/// Detalle de un reporte (descripción y URL firmada de la evidencia).
+final reportDetailProvider = FutureProvider.autoDispose.family<Reporte, int>(
+  (ref, id) => ref.watch(reportsRepositoryProvider).getReport(id),
+);
+
 class ReportsRepository {
   ReportsRepository(this._dio);
 
@@ -85,6 +90,54 @@ class ReportsRepository {
       options: Options(headers: {'Idempotency-Key': idempotencyKey}),
     );
     return Reporte.fromJson(response.data!);
+  });
+
+  /// RF6. Reportes dentro del rectángulo `minLng,minLat,maxLng,maxLat`.
+  Future<List<Reporte>> listByBbox({
+    required double minLng,
+    required double minLat,
+    required double maxLng,
+    required double maxLat,
+    EstadoReporte? estado,
+    int size = 100,
+  }) => _call(() async {
+    final response = await _dio.get<Map<String, dynamic>>(
+      '/api/reportes',
+      queryParameters: {
+        'bbox':
+            '${minLng.toStringAsFixed(6)},${minLat.toStringAsFixed(6)},'
+            '${maxLng.toStringAsFixed(6)},${maxLat.toStringAsFixed(6)}',
+        if (estado != null) 'estado': estado.api,
+        'page': 0,
+        'size': size,
+      },
+    );
+    return (response.data!['items'] as List<dynamic>)
+        .map((e) => Reporte.fromJson(e as Map<String, dynamic>))
+        .toList();
+  });
+
+  /// Detalle de un reporte (`GET /api/reportes/{id}`).
+  Future<Reporte> getReport(int idReporte) => _call(() async {
+    final response = await _dio.get<Map<String, dynamic>>(
+      '/api/reportes/$idReporte',
+    );
+    return Reporte.fromJson(response.data!);
+  });
+
+  /// RF3. Un vecino confirma el restablecimiento desde su ubicación.
+  Future<Validacion> validate(
+    int idReporte, {
+    required double lat,
+    required double lng,
+    required String idempotencyKey,
+  }) => _call(() async {
+    final response = await _dio.post<Map<String, dynamic>>(
+      '/api/reportes/$idReporte/validaciones',
+      data: {'lat': lat, 'lng': lng},
+      options: Options(headers: {'Idempotency-Key': idempotencyKey}),
+    );
+    return Validacion.fromJson(response.data!);
   });
 
   Future<T> _call<T>(Future<T> Function() request) async {

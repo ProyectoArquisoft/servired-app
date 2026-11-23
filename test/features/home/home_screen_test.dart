@@ -65,10 +65,10 @@ void main() {
   testWidgets('navega a una sección y vuelve', (tester) async {
     await pumpApp(tester);
 
-    await tester.tap(find.text('Mapa'));
+    await tester.tap(find.text('Mis reportes'));
     await tester.pumpAndSettle();
     expect(
-      find.text('Muy pronto vas a poder usar esta sección.'),
+      find.text('Buscar por ID, servicio, descripción o estado...'),
       findsOneWidget,
     );
 
