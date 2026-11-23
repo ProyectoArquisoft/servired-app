@@ -68,7 +68,8 @@ void main() {
     ) async {
       final api = await openFlow(tester);
 
-      await tester.tap(find.widgetWithText(ListTile, label));
+      // `.first`: el buscador repite el tile si título y subtítulo coinciden.
+      await tester.tap(find.widgetWithText(ListTile, label).first);
       await tester.pumpAndSettle();
       expect(find.text('Paso 2 de 3'), findsOneWidget);
 
@@ -79,6 +80,10 @@ void main() {
       await tester.pumpAndSettle();
 
       await tester.tap(find.text('Enviar reporte'));
+      // Leer la foto del disco es E/S real: hay que dejar correr el reloj real.
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 300)),
+      );
       await tester.pumpAndSettle();
       expect(find.text('¡Recibimos tu reporte!'), findsOneWidget);
 
